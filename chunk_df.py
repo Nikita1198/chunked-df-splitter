@@ -25,8 +25,7 @@ def chunk_df_generator(df: pd.DataFrame, min_chunk_size: int):
     if df.empty:
         return
 
-    if not df['dt'].is_monotonic_increasing:
-        df = df.sort_values('dt')
+    df = df.sort_values('dt')
 
     group_starts = df['dt'].ne(df['dt'].shift()).to_numpy().nonzero()[0]
     group_starts = list(group_starts) + [len(df)]
@@ -71,8 +70,7 @@ def chunk_df_optimized(df: pd.DataFrame, min_chunk_size: int):
     if df.empty:
         return
 
-    if not df['dt'].is_monotonic_increasing:
-        df = df.sort_values('dt')
+    df = df.sort_values('dt')
 
     dt_array = df['dt'].to_numpy()
     boundary = np.empty(len(dt_array), dtype=bool)
@@ -120,6 +118,7 @@ def chunk_df_polars(df: pl.DataFrame, min_chunk_size: int):
         return
 
     df = df.sort('dt')
+
     boundary = (df['dt'] != df['dt'].shift()).fill_null(True)
     group_starts = df.with_row_index().filter(boundary)['index'].to_list()
     group_starts.append(len(df))
